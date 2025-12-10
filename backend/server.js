@@ -7,59 +7,55 @@ import OpenAI from "openai";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 1000;
+const PORT = process.env.PORT || 4000;
 
-// Allow requests from anywhere (you can restrict later if you stop being lazy)
-app.use(cors());
-app.use(express.json());
+// ---------- MIDDLEWARE ----------
+app.use(cors());                   // allow all origins (GitHub Pages, etc.)
+app.use(express.json());           // parse JSON body
 
 // ---------- OPENAI CLIENT ----------
+if (!process.env.OPENAI_API_KEY) {
+  console.warn("WARNING: OPENAI_API_KEY is not set!");
+}
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
-// Simple health check
+// ---------- ROUTES ----------
+
+// Health check
 app.get("/", (req, res) => {
-  res.send("Budget Tracker AI backend is running.");
+  res.send("Budget AI backend is alive.");
 });
 
-// ---------- /analyze ENDPOINT ----------
+// Main analyze route
 app.post("/analyze", async (req, res) => {
   try {
     const { prompt } = req.body;
 
     if (!prompt || typeof prompt !== "string") {
-      return res.status(400).json({
-        error: "Missing 'prompt' in request body (must be a string).",
-      });
+      return res.status(400).json({ analysis: "Invalid prompt." });
     }
 
-    // Call OpenAI Responses API
-    const response = await client.responses.create({
-      model: "gpt-5.1-mini",
-      input: prompt,
+    const completion = await client.responses.create({
+      model: "gpt-4.1-mini",
+      input: prompt
     });
 
-    // Safely extract text (output_text is the helper)
     const text =
-      response.output_text ||
-      response.output?.[0]?.content?.[0]?.text?.value ||
-      "";
+      completion.output?.[0]?.content?.[0]?.text ||
+      "No analysis generated.";
 
-    return res.json({
-      analysis: text.trim() || "No analysis generated.",
-    });
+    res.json({ analysis: text });
   } catch (err) {
-    console.error("Error in /analyze:", err);
-
-    return res.status(500).json({
-      error: "AI analysis failed on the server.",
-      details: process.env.NODE_ENV === "development" ? String(err) : undefined,
+    console.error("OpenAI error:", err);
+    res.status(500).json({
+      analysis: "Server error while talking to AI. Check backend logs."
     });
   }
 });
 
-// ---------- START SERVER ----------
+// ---------- START ----------
 app.listen(PORT, () => {
   console.log(`API running on port ${PORT}`);
 });
