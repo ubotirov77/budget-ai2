@@ -7,7 +7,7 @@ import OpenAI from "openai";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 1000;
 
 // Allow requests from anywhere (you can restrict later if you stop being lazy)
 app.use(cors());
