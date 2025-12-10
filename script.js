@@ -563,27 +563,27 @@ Rules:
   --------------------------------------------------------- */
 
   async function sendToBackend(prompt) {
-    if (!els.aiPopup || !els.aiPopupOutput) return;
+  if (!els.aiPopup || !els.aiPopupOutput) return;
 
-    els.aiPopup.classList.add("show");
-    els.aiPopupOutput.textContent = "Analyzing...";
+  els.aiPopup.classList.add("show");
+  els.aiPopupOutput.textContent = "Analyzing...";
 
-    try {
-      const res = await fetch("https://budget-ai2.onrender.com", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
+  try {
+    const res = await fetch("https://budget-ai2.onrender.com/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
 
-      const data = await res.json();
-
-      els.aiPopupOutput.innerHTML = (data.analysis || "No response.")
-        .replace(/\n/g, "<br>");
-        
-    } catch (err) {
-      els.aiPopupOutput.textContent = "Error: Backend connection failed.";
-    }
+    const data = await res.json();
+    els.aiPopupOutput.innerHTML = (data.analysis || "No response.")
+      .replace(/\n/g, "<br>");
+  } catch (err) {
+    console.error(err);
+    els.aiPopupOutput.textContent = "Error: Backend connection failed.";
   }
+}
+
 
   /* ---------------------------------------------------------
       AI BUTTON CLICK
