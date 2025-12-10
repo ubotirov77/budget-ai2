@@ -569,11 +569,11 @@ Rules:
   els.aiPopupOutput.textContent = "Analyzing...";
 
   try {
-    const res = await fetch("https://budget-ai2.onrender.com/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
+   const res = await fetch("https://budget-ai2.onrender.com", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ prompt })
+});
 
     const data = await res.json();
     els.aiPopupOutput.innerHTML = (data.analysis || "No response.")
